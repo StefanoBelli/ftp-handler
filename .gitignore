@@ -25,3 +25,29 @@ proguard/
 
 # Log Files
 *.log
+
+#Java Source Code
+*.java
+
+#Java Archive
+*.jar
+
+#Cpp Source code
+*.cpp 
+*.cxx
+
+#C Source code
+*.c
+
+#C# Source code
+*.cs
+
+#HTML
+*.html
+
+#JS
+*.js
+
+#PHP
+*.php
+
