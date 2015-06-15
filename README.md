@@ -29,3 +29,13 @@ and then
  [*2015/06/14*]
 
  - Init :)
+ 
+ [*2015/06/15*]
+
+ - Arguments (syntax: *ftph url debuglevel* , use --help to get help)
+ - defined mainf() [all start here]
+ - defined login() [after connect()]
+ - defined connect() [gets the argument and it will try to reach the *url* ]
+ 
+
+
