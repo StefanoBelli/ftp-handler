@@ -1,4 +1,5 @@
 #! /usr/bin/env python2.7 
+<<<<<<< HEAD
 #
 # FtpH : A Command Line Interface handler for your FTPs
 # 
@@ -19,6 +20,9 @@
 #
 # to get latest update, go to ftp-handler/ local directory and execute 'git pull' inside this directory :)
 #
+=======
+#ciao
+>>>>>>> 92f60a45d4e2bcb7df2971777bad09853af4893a
 
 #Needed modules
 from ftplib import FTP
