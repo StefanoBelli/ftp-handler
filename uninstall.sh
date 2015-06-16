@@ -14,6 +14,6 @@ if [[ $USER == "root" ]]; then
 	printf "\033[31m*\033[0m There was a problem!\n"
 	exit 1
 else
-	printf "\033[31m*\033[0m You need to be root!\n"
+	printf "\033[31m*\033[0m You need to be root. Nothing to do.\n"
 	exit 2
 fi
