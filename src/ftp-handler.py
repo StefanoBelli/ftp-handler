@@ -8,7 +8,7 @@
 # execute - git pull in ftp-handler/ local repository
 #
 # { Version: devel }
-# { Update Date: DD/MM/YYYY - 15/06/2015 } 
+# { Update Date: DD/MM/YYYY - 17/06/2015 } 
 # { Status: DEVELOPMENT }
 #
 # Developer(s):
@@ -20,6 +20,14 @@
 # to get latest update, go to ftp-handler/ local directory and execute 'git pull' inside this directory :)
 #
 
+#
+## TO-DO
+# --> SSL Support
+# --> Regular Expression (operations)
+# --> Help page in prompt()->while(..) [h key]
+# ?-> Maybe more...
+#
+
 #Needed modules
 from ftplib import FTP
 from ftplib import error_perm
@@ -28,18 +36,29 @@ import sys
 import re
 import time
 from socket import gaierror
+from socket import gethostbyname
 import getpass
 
 ##Arguments by command line prompt##
 arg_counter = int(len(sys.argv))
 
+#Get local user
+getluser = str(getpass.getuser())
+
+#Get ip address
+global getsrvip
+
 #Init ftpsrv var
 global ftpsrv
 debuglevel = 0
 
+#Used for naming users right
+global srvuser
+srvuser = ""
+
 #Version info
 version = "devel" 
-udate = "15/06/2015"
+udate = "17/06/2015"
 
 #Banner
 banner = '''
@@ -84,6 +103,7 @@ try:
 			print helppage
 			sys.exit(0)
 		else:
+			getsrvip = gethostbyname(arg_url_ftp)
 			pass
 	except IndexError:
 		print "\033[31m * \033[0m You need to type ftp url at least. Try '--help'\n"
@@ -125,17 +145,16 @@ except TypeError:
 	print "\n\033[31m * \033[0mDon't worry if you see this message, this is a developer [Type, var] mistake, not yours! :) \n"
 	sys.exit(1)
 except IOError:
-	print "\n\033[31m * \033[0mInput/Output error!\n"
-	sys.exit(1)
+	pass
 except AttributeError:
 	print "\n\033[31m * \033[0mDon't worry if you see this message, this is a developer [Attribute] mistake, not yours! :) \n"
 	sys.exit(1)
-
 
 ####################################################################################################
 
 #Connect()
 def connect(url, dbl):
+	
 	print "\033[33m * \033[0m Trying to connect to: "+str(arg_url_ftp)+", wait..."
 	try:
 		global ftpsrv
@@ -145,12 +164,13 @@ def connect(url, dbl):
 	except gaierror:
 		print "\n\033[31m * \033[0m Error! Server wasn't reachable!\n\033[33m * \033[0m Try --help to get more infos\n"
 		sys.exit(3)
-	print "\033[32m * \033[0m Succesfully connected to %s! \n"%url
+	print "\033[32m * \033[0m Succesfully connected to %s - [IP: %s] \n"%(url, getsrvip)
 	time.sleep(1)
 
 #Login 
 def login(strurl):
 	try:
+		global username
 		print "************LOGIN @ %s**********************************************************" %strurl
 		print "=To connect anonymously, leave empty username and password"
 		print "=But remember that if you login as anonymous you can't do something"
@@ -165,38 +185,82 @@ def login(strurl):
 		ftpsrv.login(username, password)
 	except error_perm:
 		print "\n\033[31m *\033[0m Username and password are wrong! Or in some cases only anonymous login is allowed.\n"
+                time.sleep(1)
 		sys.exit(3)
 	if username == "" and password == "":
 		print "\033[32m *\033[0m You logged in as Anonymous... remember that you can't do many things :) Enjoy\n"
-		time.sleep(1)
 	elif username == "root":
-		print "\033[33m *\033[0m You are now 'ROOT', be responsible!\n"
-		time.sleep(1)
+		print "\033[33m *\033[0m Hello, %s you are now \033[31mroot\033[0m@%s, be responsible!\n" %(getluser, strurl)
 	else:
-		print "\033[32m *\033[0m Hello, %s, you logged in @ %s ;)\n" %(username, strurl)
-		time.sleep(1)
+		print "\033[32m *\033[0m Hello, %s, you logged in @ %s ;)\n" %(username, strurl)	
 
+#FTP Browser
+def ftpWelcome(strurl, username):
+	if username != "":
+		srvuser = username
+	elif username == "root":
+		srvuser = "root"
+	else:
+		srvuser = "anonymous user"
+        os.system("clear")
+	print "\033[32m+-----~Welcome to~[\033[0m\033[34m%s\033[0m\033[32m]~that says-----------+\033[0m" %strurl 
+	print ftpsrv.getwelcome()
+	print "\033[32m+---------~~~[\033[0mIP:\033[34m%s\033[0m\033[32m]~~~--------------------+\033[0m" %getsrvip
+	prompt(srvuser)
+	return srvuser
+
+#Prompt conf
+def prompt(suser):
+	dirr = ftpsrv.nlst()
+	print "=\033[33mDIRECTORY\033[0m-----[\033[34m%s\033[0m]-[\033[34m%s\033[0m]================================================"%(suser, getsrvip)
+	print "Current Working Directory: %s" %ftpsrv.pwd()
+	for i in range(len(dirr)):
+		print ">>> "+str(dirr[i])
+	print "=\033[33mDIRECTORY\033[0m-----[\033[34m%s\033[0m]-[\033[34m%s\033[0m]================================================"%(suser, getsrvip) 
+	prompt = raw_input(">>> ")
+	checkPrompt(prompt)
+	while (prompt != "ex"):
+		os.system("clear")
+		print "=\033[33mDIRECTORY\033[0m-----[\033[34m%s\033[0m]-[\033[34m%s\033[0m]================================================"%(suser, getsrvip)
+		print "Current Working Directory: %s" %ftpsrv.pwd()
+		for i in range(len(dirr)):
+			print ">>> "+str(dirr[i])
+		print "=\033[33mDIRECTORY\033[0m-----[\033[34m%s\033[0m]-[\033[34m%s\033[0m]================================================"%(suser, getsrvip) 
+		prompt = raw_input(">>> ")
+		checkPrompt(prompt)
+	
+#If statement for prompt
+def checkPrompt(prompt):
+	if prompt == "ex":
+		print "\033[33m*\033[0m Closing connection..."
+		ftpsrv.quit()
+		print "\033[32m*\033[0m Bye bye! "
+	
 #Mainf, all start here
 def mainf():
 	connect(arg_url_ftp, debuglevel)
 	login(arg_url_ftp)
+	ftpWelcome(arg_url_ftp, username)
 
 ##Hello! :D##
-try:
-	mainf()
-except KeyboardInterrupt:
-	print "\n\033[34m * \033[0mUser exited.\n"
-	sys.exit(2)
-except SyntaxError:
-	print "\n\033[31m * \033[0mDon't worry if you see this message, this is a developer [Syntax] mistake, not yours! :) \n"
+if __name__ == '__main__':
+	try:
+		mainf()
+	except KeyboardInterrupt:
+		print "\n\033[34m * \033[0mUser exited.\n"
+		sys.exit(2)
+	except SyntaxError:
+		print "\n\033[31m * \033[0mDon't worry if you see this message, this is a developer [Syntax] mistake, not yours! :) \n"
+		sys.exit(1)
+	except TypeError:
+		print "\n\033[31m * \033[0mDon't worry if you see this message, this is a developer [Type, var] mistake, not yours! :) \n"
+	        sys.exit(1)
+	except IOError:
+		print "\n\033[31m * \033[0mInput/Output error!\n"
+		sys.exit(1)
+	except AttributeError:
+		print "\n\033[31m * \033[0mDon't worry if you see this message, this is a developer [Attribute] mistake, not yours! :) \n"
+          	sys.exit(1)
+else:
+	print "\n"
 	sys.exit(1)
-except TypeError:
-	print "\n\033[31m * \033[0mDon't worry if you see this message, this is a developer [Type, var] mistake, not yours! :) \n"
-	sys.exit(1)
-except IOError:
-	print "\n\033[31m * \033[0mInput/Output error!\n"
-	sys.exit(1)
-except AttributeError:
-	print "\n\033[31m * \033[0mDon't worry if you see this message, this is a developer [Attribute] mistake, not yours! :) \n"
-	sys.exit(1)
-
