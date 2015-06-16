@@ -37,5 +37,12 @@ and then
  - defined login() [after connect()]
  - defined connect() [gets the argument and it will try to reach the *url* ]
  
+ [*2015/06/17*]
+ 
+ - Added Welcome message
+ - Added FTP command prompt
+ - Listing directory
+ - nslookup (socket module)
+ - more...
 
 
