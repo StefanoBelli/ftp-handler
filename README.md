@@ -17,8 +17,7 @@ and then
  We expect to implement 
  
  - SSL Support
- - A favourite list to easy access your FTP favourite server
- - GUI (PyGTK -- TkInter)
+ - Regular exp to Explore your FTPs
 
 # Hope you will give it a try! :P 
 
@@ -44,5 +43,3 @@ and then
  - Listing directory
  - nslookup (socket module)
  - more...
-
-
