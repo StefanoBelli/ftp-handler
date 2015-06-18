@@ -8,7 +8,7 @@
 # execute - git pull in ftp-handler/ local repository
 #
 # { Version: devel }
-# { Update Date: DD/MM/YYYY - 17/06/2015 } 
+# { Update Date: DD/MM/YYYY - 18/06/2015 } 
 # { Status: DEVELOPMENT }
 #
 # Developer(s):
@@ -22,28 +22,36 @@
 
 #
 ## TO-DO
-# --> SSL Support
-# --> Regular Expression (operations)
 # --> Help page in prompt()->while(..) [h key]
-# ?-> Maybe more...
-#
+# --> Download, upload files (binary, ascii modes)
+# --> Reach 0.5 Version :) [All works]
+# \__Check for errors
+#  \__Error Handling
+#   \__Get a better output format (colors, syntax...)
+#    \__Code syntax (spaces, useless lines...)
+#    ~~Then~~
+#     \==>Get a 1.0 version ;) 
+# 
 
 #Needed modules
-from ftplib import FTP
-from ftplib import error_perm
 import os
 import sys
-import re
-import time
+from ftplib import FTP
+from ftplib import error_perm
+from ftplib import error_temp
+from re import split
+from time import sleep
+from time import localtime
 from socket import gaierror
 from socket import gethostbyname
-import getpass
+from getpass import getuser
+from getpass import getpass 
 
 ##Arguments by command line prompt##
 arg_counter = int(len(sys.argv))
 
 #Get local user
-getluser = str(getpass.getuser())
+getluser = str(getuser())
 
 #Get ip address
 global getsrvip
@@ -56,9 +64,13 @@ debuglevel = 0
 global srvuser
 srvuser = ""
 
+#Localtime
+global lgtime
+lgtime = localtime()
+
 #Version info
 version = "devel" 
-udate = "17/06/2015"
+udate = "18/06/2015"
 
 #Banner
 banner = '''
@@ -154,7 +166,6 @@ except AttributeError:
 
 #Connect()
 def connect(url, dbl):
-	
 	print "\033[33m * \033[0m Trying to connect to: "+str(arg_url_ftp)+", wait..."
 	try:
 		global ftpsrv
@@ -165,7 +176,7 @@ def connect(url, dbl):
 		print "\n\033[31m * \033[0m Error! Server wasn't reachable!\n\033[33m * \033[0m Try --help to get more infos\n"
 		sys.exit(3)
 	print "\033[32m * \033[0m Succesfully connected to %s - [IP: %s] \n"%(url, getsrvip)
-	time.sleep(1)
+	sleep(1)
 
 #Login 
 def login(strurl):
@@ -178,20 +189,26 @@ def login(strurl):
 		print "=And some servers don't accept Anonymous users."
 		print "==Password is NOT shown=="
 		username = str(raw_input("* Username: "))
-		password = str(getpass.getpass("* Password: "))
+		password = str(getpass("* Password: "))
 		print "********************%s**********************************************************" %strurl
-		time.sleep(1)
-		os.system("clear")
+		sleep(1)
 		ftpsrv.login(username, password)
 	except error_perm:
+		os.system("clear")
 		print "\n\033[31m *\033[0m Username and password are wrong! Or in some cases only anonymous login is allowed.\n"
-                time.sleep(1)
+                sleep(1)
 		sys.exit(3)
 	if username == "" and password == "":
+		os.system("clear")
+		print "\033[31m******\033[0mUse 'h' command to get help\033[31m******\033[0m"
 		print "\033[32m *\033[0m You logged in as Anonymous... remember that you can't do many things :) Enjoy\n"
 	elif username == "root":
+		os.system("clear")
+		print "\033[31m******\033[0mUse 'h' command to get help\033[31m******\033[0m"
 		print "\033[33m *\033[0m Hello, %s you are now \033[31mroot\033[0m@%s, be responsible!\n" %(getluser, strurl)
 	else:
+		os.system("clear")
+		print "\033[31m******\033[0mUse 'h' command to get help\033[31m******\033[0m"
 		print "\033[32m *\033[0m Hello, %s, you logged in @ %s ;)\n" %(username, strurl)	
 
 #FTP Browser
@@ -202,7 +219,13 @@ def ftpWelcome(strurl, username):
 		srvuser = "root"
 	else:
 		srvuser = "anonymous user"
-        os.system("clear")
+	#Logged-In from
+	print "\033[32m*\033[0m"
+	print "\033[32m*\033[0m \O.O/<_______________"
+	print "\033[32m*\033[0m  | | <Logged in from|"
+	print "\033[32m*\033[0m  / \ <---------------"
+	print "\033[32m*\033[0m %s:%s:%s on %s/%s/%s" %(lgtime.tm_hour, lgtime.tm_min, lgtime.tm_sec, lgtime.tm_year, lgtime.tm_mon, lgtime.tm_mday)
+	print "\033[32m*\033[0m"
 	print "\033[32m+-----~Welcome to~[\033[0m\033[34m%s\033[0m\033[32m]~that says-----------+\033[0m" %strurl 
 	print ftpsrv.getwelcome()
 	print "\033[32m+---------~~~[\033[0mIP:\033[34m%s\033[0m\033[32m]~~~--------------------+\033[0m" %getsrvip
@@ -213,28 +236,95 @@ def ftpWelcome(strurl, username):
 def prompt(suser):
 	dirr = ftpsrv.nlst()
 	print "=\033[33mDIRECTORY\033[0m-----[\033[34m%s\033[0m]-[\033[34m%s\033[0m]================================================"%(suser, getsrvip)
-	print "Current Working Directory: %s" %ftpsrv.pwd()
+	print "\033[32mCurrent Working Directory\033[0m: \033[34m%s\033[0m" %ftpsrv.pwd()
 	for i in range(len(dirr)):
 		print ">>> "+str(dirr[i])
+	print "\033[32mCurrent Working Directory\033[0m: \033[34m%s\033[0m" %ftpsrv.pwd()
 	print "=\033[33mDIRECTORY\033[0m-----[\033[34m%s\033[0m]-[\033[34m%s\033[0m]================================================"%(suser, getsrvip) 
 	prompt = raw_input(">>> ")
 	checkPrompt(prompt)
 	while (prompt != "ex"):
 		os.system("clear")
+		dirr = ftpsrv.nlst()
+		print ""
+		print "\033[32m*\033[0m Logged in from: %s:%s:%s on %s/%s/%s" %(lgtime.tm_hour, lgtime.tm_min, lgtime.tm_sec, lgtime.tm_year, lgtime.tm_mon, lgtime.tm_mday)
 		print "=\033[33mDIRECTORY\033[0m-----[\033[34m%s\033[0m]-[\033[34m%s\033[0m]================================================"%(suser, getsrvip)
-		print "Current Working Directory: %s" %ftpsrv.pwd()
+		print "\033[32mCurrent Working Directory\033[0m: \033[34m%s\033[0m" %ftpsrv.pwd()
 		for i in range(len(dirr)):
 			print ">>> "+str(dirr[i])
+		print "\033[32mCurrent Working Directory\033[0m: \033[34m%s\033[0m" %ftpsrv.pwd()
 		print "=\033[33mDIRECTORY\033[0m-----[\033[34m%s\033[0m]-[\033[34m%s\033[0m]================================================"%(suser, getsrvip) 
 		prompt = raw_input(">>> ")
 		checkPrompt(prompt)
-	
+
 #If statement for prompt
 def checkPrompt(prompt):
+        #For each statement error_perm, error_perm, IndexError
+	#Add h command to get help
+
+	###Check the prompt input###
+	rechk = split('\s|(?<!\d)[,](?!\d)',prompt)
+
+	#Exit command
 	if prompt == "ex":
 		print "\033[33m*\033[0m Closing connection..."
 		ftpsrv.quit()
 		print "\033[32m*\033[0m Bye bye! "
+
+	#Change Directory command
+	elif rechk[0] == "/":
+		ftpsrv.cwd(str(rechk[1]))
+	
+	#OS Shell command (command)
+	elif rechk[0] == "os":
+		print "\033[32m*\033[0mSystem shell command output"
+		print "+-------------------------+"
+		os.system("%s" %str(rechk[1]))
+		raw_input("===END OF OUTPUT===\nPress any key to get back...")
+
+	#RemoveDirectory command
+	elif rechk[0] == "rd":
+		ftpsrv.rmd(str(rechk[1]))
+
+	#RemoveFile command
+	elif rechk[0] == "rf":
+		ftpsrv.delete(str(rechk[1]))
+
+	#Size of file command
+	elif rechk[0] == "sz":
+		fsize = ftpsrv.size(str(rechk[1]))
+		print "File %s is big: %s Byte(s)" %(str(rechk[1]), str(fsize))
+		raw_input("Press any key to get back...")
+
+	#Make Directory command
+	elif rechk[0] == "md":
+		ftpsrv.mkd(str(rechk[1]))
+	
+	#Rename File & Directories 
+	elif rechk[0] == "rn":
+		ftpsrv.rename(str(rechk[1]), str(rechk[2]))
+	
+	#List directories
+	elif rechk[0] == "als":
+		dirname = str(rechk[1])
+		ftpsrv.dir(dirname)
+		raw_input("Press any key to continue... ")
+	
+	#FTP Command Execution
+	elif rechk[0] == "fcmd":
+		ftpsrv.sendcmd(str(rechk[1]))
+		raw_input("===END OF OUTPUT===\nPress any key to get back....")
+	
+	#Help page
+	elif prompt == 'h':
+		print "FTPH Browser Commands: "
+		print "***This page is under construction***"
+		raw_input("Press any key to get back...")
+
+	#If no command matches
+	else:
+		print "\033[33m*\033[0m I can't recognize this command: %s!"%(prompt)
+		sleep(1)
 	
 #Mainf, all start here
 def mainf():
