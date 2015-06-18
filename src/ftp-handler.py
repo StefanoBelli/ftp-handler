@@ -88,17 +88,33 @@ A simple FTP Manager for your FTPs, from Command Line! :)
 
 #Help page
 helppage = '''
+=====================================HELP PAGE===============================================================
 FTPH: FTP Manager
 ++++++++++++++++++
 Usage: [./ftph.py] <url/help> (debug level)
 ++++++++++++++++++
 url/help: Type ftp server URL (like this: ftp.site.com) / --help, to type this help page.
 debug level: Defines how many debug messages the FTP server should show. It is not compulsory, see below.
+***WARNING: TO SEE HOW TO USE FTPH BROWSER, TYPE COMMAND 'h' (to see how to use other commands) WHEN YOU GET INTO THE FTP***
 ++++++++++++++++++
 Debug Values: integer
 |___________1 : minimum debug level
 |___________>= 2 : higher debug level
 If you don't declare any debug level, the value is 0
+++++++++++++++++++
+Example: 
+ftph ftp.debian.org   (Debug level will be null)
+ftph ftp.debian.org 1 (Debug level will be min)
+ftph ftp.debian.org 2 (Debug level will be max)
+++++++++++++++++++
+Developer: 
+Stefano Belli
+\_-> GitHub: <https://github.com/StefanoBelli>
+ \_-> Google+: <https://plus.google.com/+StefanoBelli>
+  \_-> mailto: <stefano9913@gmail.com>
+   \_-> Website: <http://www.inthebit.it>
++++++++++++++++++++
+FTPH Repository: <https://github.com/StefanoBelli/ftp-handler
 '''
 
 os.system("clear")
