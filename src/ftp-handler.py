@@ -7,9 +7,9 @@
 # To get latest releases:
 # execute - git pull in ftp-handler/ local repository
 #
-# { Version: devel }
-# { Update Date: DD/MM/YYYY - 18/06/2015 } 
-# { Status: DEVELOPMENT }
+# { Version: 0.5 }
+# { Update Date: DD/MM/YYYY - 19/06/2015 } 
+# { Status: [FINAL DEVELOPMENT STAGE] }
 #
 # Developer(s):
 #  ---> StefanoBelli
@@ -22,9 +22,7 @@
 
 #
 ## TO-DO
-# --> Help page in prompt()->while(..) [h key]
-# --> Download, upload files (binary, ascii modes)
-# --> Reach 0.5 Version :) [All works]
+#\__Write the help page ('h')
 # \__Check for errors
 #  \__Error Handling
 #   \__Get a better output format (colors, syntax...)
@@ -49,6 +47,7 @@ from getpass import getpass
 
 ##Arguments by command line prompt##
 arg_counter = int(len(sys.argv))
+############
 
 #Get local user
 getluser = str(getuser())
@@ -69,8 +68,8 @@ global lgtime
 lgtime = localtime()
 
 #Version info
-version = "devel" 
-udate = "18/06/2015"
+version = float(0.5) 
+udate = "19/06/2015"
 
 #Banner
 banner = '''
@@ -122,7 +121,6 @@ os.system("clear")
 print banner
 
 #############################ARGUMENT CHECK#######################################################
-#KeyboardInterrupt
 try:
 	#Checks URL argument
 	try:
@@ -180,7 +178,7 @@ except AttributeError:
 
 ####################################################################################################
 
-#Connect()
+#Connect and check...
 def connect(url, dbl):
 	print "\033[33m * \033[0m Trying to connect to: "+str(arg_url_ftp)+", wait..."
 	try:
@@ -194,7 +192,7 @@ def connect(url, dbl):
 	print "\033[32m * \033[0m Succesfully connected to %s - [IP: %s] \n"%(url, getsrvip)
 	sleep(1)
 
-#Login 
+#Login to the connected server
 def login(strurl):
 	try:
 		global username
@@ -227,7 +225,7 @@ def login(strurl):
 		print "\033[31m******\033[0mUse 'h' command to get help\033[31m******\033[0m"
 		print "\033[32m *\033[0m Hello, %s, you logged in @ %s ;)\n" %(username, strurl)	
 
-#FTP Browser
+#FTP Browser (CLI)
 def ftpWelcome(strurl, username):
 	if username != "":
 		srvuser = username
@@ -248,7 +246,7 @@ def ftpWelcome(strurl, username):
 	prompt(srvuser)
 	return srvuser
 
-#Prompt conf
+#Prompt (FTP Browser prompt)
 def prompt(suser):
 	dirr = ftpsrv.nlst()
 	print "=\033[33mDIRECTORY\033[0m-----[\033[34m%s\033[0m]-[\033[34m%s\033[0m]================================================"%(suser, getsrvip)
@@ -286,19 +284,18 @@ def checkPrompt(prompt):
 		print "\033[33m*\033[0m Closing connection..."
 		ftpsrv.quit()
 		print "\033[32m*\033[0m Bye bye! "
+		sys.exit(0)
+
+	#OS Shell
+	elif prompt == "osh":
+		print "\033[32m*\033[0m Switching to sh... Type exit to get back here :) "
+		os.system("sh")
 
 	#Change Directory command
-	elif rechk[0] == "/":
+	elif rechk[0] == "cd":
 		ftpsrv.cwd(str(rechk[1]))
-	
-	#OS Shell command (command)
-	elif rechk[0] == "os":
-		print "\033[32m*\033[0mSystem shell command output"
-		print "+-------------------------+"
-		os.system("%s" %str(rechk[1]))
-		raw_input("===END OF OUTPUT===\nPress any key to get back...")
 
-	#RemoveDirectory command
+	#Remove Direcotory command
 	elif rechk[0] == "rd":
 		ftpsrv.rmd(str(rechk[1]))
 
@@ -323,6 +320,7 @@ def checkPrompt(prompt):
 	#List directories
 	elif rechk[0] == "als":
 		dirname = str(rechk[1])
+		print "*-*-*-*-*\033[34mListing directory: %s\033[0m*-*-*-*-*" %dirname
 		ftpsrv.dir(dirname)
 		raw_input("Press any key to continue... ")
 	
@@ -331,6 +329,50 @@ def checkPrompt(prompt):
 		ftpsrv.sendcmd(str(rechk[1]))
 		raw_input("===END OF OUTPUT===\nPress any key to get back....")
 	
+	#Get Binary file (non ASCII) from FTP
+	elif rechk[0] == "dlb":
+		dlfile = open(str(rechk[2]), "wb").write
+		print "\033[32m*\033[0m Downloading: "+str(rechk[1])+"..."
+		print "\033[33m*\033[0m Requested file "+"'"+str(rechk[1])+"'"+" size is: "+str(ftpsrv.size(str(rechk[1])))+" Byte(s)"
+		ftpsrv.retrbinary("RETR "+str(rechk[1]), dlfile)
+		print "\033[32m*\033[0m Downloaded file: "+os.getcwd()+"/"+rechk[2]
+		raw_input("Press any key to continue...")
+
+	#Upload Binary file (non ASCII) to FTP
+	elif rechk[0] == "ulb":
+		if os.access(str(rechk[1]), os.F_OK):
+			print "\033[32m*\033[0m File exists"
+			ulfile = open(str(rechk[1]), "rb")
+		        print "\033[32m*\033[0m Uploading: "+str(rechk[1])+"..."
+			ftpsrv.storbinary('STOR '+str(rechk[1]), ulfile)
+			print "\033[32m*\033[0m Uploaded file "+"'"+str(rechk[1])+"'"+" which size is: "+str(ftpsrv.size(str(rechk[1])))+" Byte(s)"
+			raw_input("Press any key to get back")
+		else:
+			print "\033[31m*\033[0m Your file doesn't exists"
+			raw_input("Press any key to get back")
+
+	#Get ASCII Lines from FTP
+	elif rechk[0] == "dla":
+		dlfile = open(str(rechk[2]), "wb").write
+		print "\033[32m*\033[0m [ASCII Mode]Downloading: "+str(rechk[1])+"..."
+		print "\033[33m*\033[0m Requested file "+"'"+str(rechk[1])+"'"+" size is: "+str(ftpsrv.size(str(rechk[1])))+" Byte(s)"
+		ftpsrv.retrlines("RETR "+str(rechk[1]), dlfile)
+		print "\033[32m*\033[0m Downloaded file: "+os.getcwd()+"/"+rechk[2]
+		raw_input("Press any key to continue...")
+
+	#Upload ASCII Lines to FTP
+	elif rechk[0] == "ula":
+		if os.access(str(rechk[1]), os.F_OK):
+			print "\033[32m*\033[0m File exists"
+			ulfile = open(str(rechk[1]), "rb")
+		        print "\033[32m*\033[0m [ASCII Mode]Uploading: "+str(rechk[1])+"..."
+			ftpsrv.storlines('STOR '+str(rechk[1]), ulfile)
+			print "\033[32m*\033[0m Uploaded file "+"'"+str(rechk[1])+"'"+" which size is: "+str(ftpsrv.size(str(rechk[1])))+" Byte(s)"
+			raw_input("Press any key to get back")
+		else:
+			print "\033[31m*\033[0m Your file doesn't exists"
+			raw_input("Press any key to get back")
+
 	#Help page
 	elif prompt == 'h':
 		print "FTPH Browser Commands: "
@@ -339,9 +381,8 @@ def checkPrompt(prompt):
 
 	#If no command matches
 	else:
-		print "\033[33m*\033[0m I can't recognize this command: %s!"%(prompt)
-		sleep(1)
-	
+		pass
+
 #Mainf, all start here
 def mainf():
 	connect(arg_url_ftp, debuglevel)
