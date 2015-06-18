@@ -46,5 +46,9 @@ and then
  - Added great things
  - Next release will be 0.5 (All working)
 
+[*2015/06/19*] {Version: 0.5} (Final Development Stage)
 
+ - Added Download/Upload in Binary/ASCII mode
+ - Fixed something
+ - Reached Version 0.5
 
