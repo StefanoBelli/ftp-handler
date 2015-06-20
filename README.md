@@ -52,3 +52,11 @@ and then
  - Fixed something
  - Reached Version 0.5
 
+[*2015/06/20*] {Version *1.0*} (Stable)
+
+ - Added exceptions 
+ - Help page for browser
+ - Better output
+ - Fixed FTP Commands
+ - Encoding: UTF-8 
+
