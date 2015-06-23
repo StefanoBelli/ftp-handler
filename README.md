@@ -59,6 +59,7 @@ and then
  - Better output
  - Fixed FTP Commands
  - Encoding: UTF-8 
+ 
 [*2015/06/23*] {Version *1.0a*} (Stable)
  
  - Fixed unhandled exception for non-exists directories
