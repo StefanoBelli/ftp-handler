@@ -8,8 +8,8 @@
 # To get latest releases:
 # execute - git pull in ftp-handler/ local repository
 #
-# { Version: 1.0a }
-# { Update Date: DD/MM/YYYY - 23/06/2015 } 
+# { Version: 1.0 }
+# { Update Date: DD/MM/YYYY - 20/06/2015 } 
 # { Status: [WORKING] } 
 #
 # Developer(s):
@@ -62,8 +62,8 @@ global lgtime
 lgtime = localtime()
 
 #Version info
-version = "1.0a" 
-udate = "23/06/2015"
+version = float(1.0) 
+udate = "20/06/2015"
 
 #Banner
 banner = '''
